@@ -17,7 +17,50 @@ pip install -r requirements.txt
    export OPENAI_API_KEY="your-api-key"
    ```
 
-2. Run the CLI commands provided by the `mcp` library to interact with the project.
+2. Start the MCP server:
+   ```bash
+   python server.py
+   ```
+
+3. Use the client to interact with the server:
+   ```bash
+   python client.py
+   ```
+
+4. Alternatively, use the orchestrator to query the LLM and tools:
+   ```bash
+   python main.py
+   ```
+
+## Example
+
+### Querying the Weather Tool
+Run the client and call the `get_weather` tool:
+```bash
+python client.py
+```
+
+Example interaction:
+```
+You: List tools
+Assistant: {
+  "tools": [
+    {
+      "name": "get_weather",
+      "description": "Get weather for a city",
+      "parameters": {
+        "city": {
+          "type": "string",
+          "description": "Name of the city"
+        }
+      }
+    }
+  ]
+}
+
+You: Call get_weather with {"city": "Beijing"}
+Assistant: 北京的天气是晴天
+```
 
 ## Dependencies
 
