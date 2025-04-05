@@ -5,17 +5,16 @@ from openai import OpenAI
 
 from client import McpClient
 
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url = "https://api.moonshot.cn/v1",
-)
 
 
 class LlmOrchestrator:
     def __init__(
-        self, 
+        self,
+        llm_api_key: str,
+        llm_base_url: str,
+        llm_model: str,
         mcp_command: str,
-        mcp_args: List[str] = None
+        mcp_args: List[str] = None,
     ):
         """
         Initialize the LLM orchestrator with an LLM API and MCP client.
@@ -24,6 +23,11 @@ class LlmOrchestrator:
             mcp_command: Command to start the MCP server
             mcp_args: Arguments for the MCP server
         """
+        self.llm_client = OpenAI(
+            api_key=llm_api_key,
+            base_url=llm_base_url,
+        )
+        self.llm_model = llm_model
         self.mcp_client = McpClient(command=mcp_command, args=mcp_args)
         self.available_tools = self._get_available_tools()
         self.conversation_history = []
@@ -80,8 +84,8 @@ class LlmOrchestrator:
         )
         
         # Call LLM API
-        completion = client.chat.completions.create(
-                model="moonshot-v1-8k",
+        completion = self.llm_client.chat.completions.create(
+                model=self.llm_model,
                 messages=[{"role": "system", "content": system_message}, *self.conversation_history],
                 temperature=0.3,
             )
@@ -131,8 +135,8 @@ class LlmOrchestrator:
             "Explain the following tool result in a clear, helpful way for the user."
         )
         
-        completion = client.chat.completions.create(
-                model="moonshot-v1-8k",
+        completion = self.llm_client.chat.completions.create(
+                model=self.llm_model,
                 messages=[
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": f"Tool: {tool_name}\nResult: {tool_result}"}
@@ -148,12 +152,16 @@ class LlmOrchestrator:
     def close(self):
         """Clean up resources"""
         self.mcp_client.terminate()
-        
-def main():
+            
+
+if __name__ == "__main__":
     # Initialize the orchestrator
     orchestrator = LlmOrchestrator(
+        llm_api_key=os.getenv("OPENAI_API_KEY"),
+        llm_base_url="https://api.moonshot.cn/v1",
+        llm_model="moonshot-v1-8k",
         mcp_command=os.path.join(os.path.abspath(os.path.curdir), ".venv", "bin", "python"),
-        mcp_args=["server.py"]
+        mcp_args=["server.py"],
     )
     
     print("LLM + MCP Assistant initialized. Type 'exit' to quit.")
@@ -169,6 +177,3 @@ def main():
     
     finally:
         orchestrator.close()
-
-if __name__ == "__main__":
-    main()
