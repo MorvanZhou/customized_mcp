@@ -1,5 +1,7 @@
 # Customized MCP Project
 
+[![smithery badge](https://smithery.ai/badge/@MorvanZhou/customized_mcp)](https://smithery.ai/server/@MorvanZhou/customized_mcp)
+
 This project leverages the `mcp` library with CLI support and integrates with OpenAI's API.
 
 ## Requirements
